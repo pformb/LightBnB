@@ -95,8 +95,29 @@ const addUser = function (user) {
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function (guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+  return pool
+    .query(
+      `SELECT reservations.id, properties.title, properties.cost_per_night, reservations.start_date, AVG(property_reviews.rating) AS average_rating
+      FROM reservations
+      JOIN properties ON reservations.property_id = properties.id
+      LEFT JOIN property_reviews ON properties.id = property_reviews.property_id
+      WHERE reservations.guest_id = $1
+      GROUP BY properties.id, reservations.id
+      ORDER BY reservations.start_date
+      LIMIT $2;`,
+      [guest_id, limit]
+    )
+    .then((result) => {
+      // Assuming user IDs are unique, so we only expect one result
+      return result.rows;
+    })
+    .catch((err) => {
+      // Handling any errors that might occur during the database query
+      console.error(err.message);
+      throw err; // Re-throw the error to handle it in the calling code
+    });
 };
+
 
 /// Properties
 
