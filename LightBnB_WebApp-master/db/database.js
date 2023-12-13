@@ -118,7 +118,6 @@ const getAllReservations = function (guest_id, limit = 10) {
     });
 };
 
-
 /// Properties
 
 /**
@@ -131,7 +130,7 @@ const getAllReservations = function (guest_id, limit = 10) {
 const getAllProperties = function (options, limit = 10) {
   // Initialize an array to store parameter values for the SQL query.
   const queryParams = [];
-  
+
   // Initialize the main part of the SQL query, including the SELECT statement and the JOIN clause.
   let queryString = `
     SELECT properties.*, AVG(property_reviews.rating) AS average_rating
@@ -148,25 +147,40 @@ const getAllProperties = function (options, limit = 10) {
   // If city is provided, add a condition to filter properties based on the city. Uses AND if there are multiple conditions.
   if (options.city) {
     queryParams.push(`%${options.city}%`);
-    queryString += `${queryParams.length > 1 ? 'AND' : 'WHERE'} city LIKE $${queryParams.length} `;
+    queryString += `${queryParams.length > 1 ? "AND" : "WHERE"} city LIKE $${
+      queryParams.length
+    } `;
   }
 
   // Conditions for filtering properties based on the price range. Adjusts the query based on the presence of minimum and maximum price values.
   if (options.minimum_price_per_night && options.maximum_price_per_night) {
-    queryParams.push(options.minimum_price_per_night * 100, options.maximum_price_per_night * 100);
-    queryString += `${queryParams.length > 2 ? 'AND' : 'WHERE'} cost_per_night BETWEEN $${queryParams.length - 1} AND $${queryParams.length} `;
+    queryParams.push(
+      options.minimum_price_per_night * 100,
+      options.maximum_price_per_night * 100
+    );
+    queryString += `${
+      queryParams.length > 2 ? "AND" : "WHERE"
+    } cost_per_night BETWEEN $${queryParams.length - 1} AND $${
+      queryParams.length
+    } `;
   } else if (options.minimum_price_per_night) {
     queryParams.push(options.minimum_price_per_night * 100);
-    queryString += `${queryParams.length > 1 ? 'AND' : 'WHERE'} cost_per_night >= $${queryParams.length} `;
+    queryString += `${
+      queryParams.length > 1 ? "AND" : "WHERE"
+    } cost_per_night >= $${queryParams.length} `;
   } else if (options.maximum_price_per_night) {
     queryParams.push(options.maximum_price_per_night * 100);
-    queryString += `${queryParams.length > 1 ? 'AND' : 'WHERE'} cost_per_night <= $${queryParams.length} `;
+    queryString += `${
+      queryParams.length > 1 ? "AND" : "WHERE"
+    } cost_per_night <= $${queryParams.length} `;
   }
 
   // Condition for filtering properties based on the minimum rating. Adjusts the query based on the presence of a minimum rating.
   if (options.minimum_rating) {
     queryParams.push(options.minimum_rating);
-    queryString += `${queryParams.length > 1 ? 'AND' : 'WHERE'} AVG(property_reviews.rating) >= $${queryParams.length} `;
+    queryString += `${
+      queryParams.length > 1 ? "AND" : "WHERE"
+    } AVG(property_reviews.rating) >= $${queryParams.length} `;
   }
 
   // Adds the GROUP BY, ORDER BY, and LIMIT clauses to complete the query.
@@ -184,21 +198,64 @@ const getAllProperties = function (options, limit = 10) {
   return pool.query(queryString, queryParams).then((res) => res.rows);
 };
 
-
-
-
-
-
 /**
  * Add a property to the database
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
+
 const addProperty = function (property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+  // Destructuring property object properties
+  const {
+    owner_id,
+    title,
+    description,
+    thumbnail_photo_url,
+    cover_photo_url,
+    cost_per_night,
+    street,
+    city,
+    province,
+    post_code,
+    country,
+    parking_spaces,
+    number_of_bathrooms,
+    number_of_bedrooms,
+  } = property;
+
+  // Using the pool to execute a SQL query to insert a new property into the 'property' table
+  return pool
+    .query(
+      `INSERT INTO properties (owner_id, title, description, thumbnail_photo_url, cover_photo_url,
+        cost_per_night, street, city, province, post_code, country, parking_spaces,
+          number_of_bathrooms, number_of_bedrooms) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 
+            $9, $10, $11, $12, $13, $14) RETURNING *`,
+      [
+        owner_id,
+        title,
+        description,
+        thumbnail_photo_url,
+        cover_photo_url,
+        cost_per_night * 100,
+        street,
+        city,
+        province,
+        post_code,
+        country,
+        parking_spaces,
+        number_of_bathrooms,
+        number_of_bedrooms,
+      ]
+    )
+    .then((result) => {
+      // Returning the newly inserted user object, including the auto-generated ID
+      console.log(result.rows[0]);
+      return result.rows[0];
+    })
+    .catch((err) => {
+      // Handling any errors that might occur during the database query
+      console.error(err.message);
+    });
 };
 
 module.exports = {
