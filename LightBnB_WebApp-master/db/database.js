@@ -130,64 +130,89 @@ const getAllReservations = function (guest_id, limit = 10) {
 const getAllProperties = function (options, limit = 10) {
   // Initialize an array to store parameter values for the SQL query.
   const queryParams = [];
-
   // Initialize the main part of the SQL query, including the SELECT statement and the JOIN clause.
   let queryString = `
     SELECT properties.*, AVG(property_reviews.rating) AS average_rating
     FROM properties
-    LEFT JOIN property_reviews ON properties.id = property_id
+    JOIN property_reviews ON properties.id = property_id
   `;
+
+  // If city is provided, add a condition to filter properties based on the city.
+  if (options.city) {
+    // Push city value with wildcard matching to queryParams array
+    queryParams.push(`%${options.city}%`);
+    // Add "AND" or "WHERE" clause based on whether other conditions have been added
+    if (queryParams.length > 1) {
+      queryString += "AND";
+    } else {
+      queryString += "WHERE";
+    }
+    queryString += ` city LIKE $${queryParams.length} `;
+  }
 
   // If owner_id is provided, add a condition to filter properties owned by a specific owner.
   if (options.owner_id) {
+    // Push owner_id value to queryParams array
     queryParams.push(options.owner_id);
-    queryString += `WHERE owner_id = $${queryParams.length} `;
+    // Add "AND" or "WHERE" clause based on whether other conditions have been added
+    if (queryParams.length > 1) {
+      queryString += "AND";
+    } else {
+      queryString += "WHERE";
+    }
+    queryString += ` owner_id = $${queryParams.length} `;
   }
 
-  // If city is provided, add a condition to filter properties based on the city. Uses AND if there are multiple conditions.
-
-  /* ternary operator (? :) is used to conditionally choose between "AND" or "WHERE" 
-    based on whether other conditions have already been added. */
-
-  if (options.city) {
-    queryParams.push(`%${options.city}%`);
-    queryString += `${queryParams.length > 1 ? "AND" : "WHERE"} city LIKE $${
-      queryParams.length
-    } `;
-  }
-
-  // Conditions for filtering properties based on the price range. Adjusts the query based on the presence of minimum and maximum price values.
+  // Conditions for filtering properties based on the price range.
   if (options.minimum_price_per_night && options.maximum_price_per_night) {
+    // Push minimum and maximum price values (converted to cents) to queryParams array
     queryParams.push(
       options.minimum_price_per_night * 100,
       options.maximum_price_per_night * 100
     );
-    queryString += `${
-      queryParams.length > 2 ? "AND" : "WHERE"
-    } cost_per_night BETWEEN $${queryParams.length - 1} AND $${
+    // Add "AND" or "WHERE" clause based on whether other conditions have been added
+    if (queryParams.length > 2) {
+      queryString += "AND";
+    } else {
+      queryString += "WHERE";
+    }
+    queryString += ` cost_per_night BETWEEN $${queryParams.length - 1} AND $${
       queryParams.length
     } `;
   } else if (options.minimum_price_per_night) {
+    // Push minimum price value (converted to cents) to queryParams array
     queryParams.push(options.minimum_price_per_night * 100);
-    queryString += `${
-      queryParams.length > 1 ? "AND" : "WHERE"
-    } cost_per_night >= $${queryParams.length} `;
+    // Add "AND" or "WHERE" clause based on whether other conditions have been added
+    if (queryParams.length > 1) {
+      queryString += "AND";
+    } else {
+      queryString += "WHERE";
+    }
+    queryString += ` cost_per_night >= $${queryParams.length} `;
   } else if (options.maximum_price_per_night) {
+    // Push maximum price value (converted to cents) to queryParams array
     queryParams.push(options.maximum_price_per_night * 100);
-    queryString += `${
-      queryParams.length > 1 ? "AND" : "WHERE"
-    } cost_per_night <= $${queryParams.length} `;
+    // Add "AND" or "WHERE" clause based on whether other conditions have been added
+    if (queryParams.length > 1) {
+      queryString += "AND";
+    } else {
+      queryString += "WHERE";
+    }
+    queryString += ` cost_per_night <= $${queryParams.length} `;
   }
 
-  // Condition for filtering properties based on the minimum rating. Adjusts the query based on the presence of a minimum rating.
+  // Condition for filtering properties based on the minimum rating.
   if (options.minimum_rating) {
+    // Push minimum rating value to queryParams array
     queryParams.push(options.minimum_rating);
-    queryString += `${
-      queryParams.length > 1 ? "AND" : "WHERE"
-    } AVG(property_reviews.rating) >= $${queryParams.length} `;
+    // Use HAVING statement to filter based on average rating
+    queryString += `
+      GROUP BY properties.id
+      HAVING AVG(property_reviews.rating) >= $${queryParams.length}
+    `;
   }
 
-  // Adds the GROUP BY, ORDER BY, and LIMIT clauses to complete the query.
+  // Add GROUP BY, ORDER BY, and LIMIT clauses to complete the query.
   queryParams.push(limit);
   queryString += `
     GROUP BY properties.id
@@ -195,12 +220,13 @@ const getAllProperties = function (options, limit = 10) {
     LIMIT $${queryParams.length};
   `;
 
-  // Logs the final query and parameters for debugging purposes.
+  // Log the final query and parameters for debugging purposes.
   console.log(queryString, queryParams);
 
-  // Executes the query using the pool object and returns the result rows.
+  // Execute the query using the pool object and return the result rows.
   return pool.query(queryString, queryParams).then((res) => res.rows);
 };
+
 
 /**
  * Add a property to the database
