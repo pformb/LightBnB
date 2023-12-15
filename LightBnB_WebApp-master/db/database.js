@@ -219,9 +219,6 @@ const getAllProperties = function (options, limit = 10) {
     LIMIT $${queryParams.length};
   `;
 
-  // Log the final query and parameters for debugging purposes.
-  console.log(queryString, queryParams);
-
   // Execute the query using the pool object and return the result rows.
   return pool.query(queryString, queryParams).then((res) => res.rows);
 };
@@ -278,7 +275,6 @@ const addProperty = function (property) {
     )
     .then((result) => {
       // Returning the newly inserted user object, including the auto-generated ID
-      console.log(result.rows[0]);
       return result.rows[0];
     })
     .catch((err) => {
