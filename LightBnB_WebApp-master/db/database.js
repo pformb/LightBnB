@@ -143,9 +143,9 @@ const getAllProperties = function (options, limit = 10) {
     queryParams.push(`%${options.city}%`);
     // Add "AND" or "WHERE" clause based on whether other conditions have been added
     if (queryParams.length > 1) {
-      queryString += "AND";
+      queryString += " AND";
     } else {
-      queryString += "WHERE";
+      queryString += " WHERE";
     }
     queryString += ` city LIKE $${queryParams.length} `;
   }
@@ -156,9 +156,9 @@ const getAllProperties = function (options, limit = 10) {
     queryParams.push(options.owner_id);
     // Add "AND" or "WHERE" clause based on whether other conditions have been added
     if (queryParams.length > 1) {
-      queryString += "AND";
+      queryString += " AND";
     } else {
-      queryString += "WHERE";
+      queryString += " WHERE";
     }
     queryString += ` owner_id = $${queryParams.length} `;
   }
@@ -172,9 +172,9 @@ const getAllProperties = function (options, limit = 10) {
     );
     // Add "AND" or "WHERE" clause based on whether other conditions have been added
     if (queryParams.length > 2) {
-      queryString += "AND";
+      queryString += " AND";
     } else {
-      queryString += "WHERE";
+      queryString += " WHERE";
     }
     queryString += ` cost_per_night BETWEEN $${queryParams.length - 1} AND $${
       queryParams.length
@@ -184,9 +184,9 @@ const getAllProperties = function (options, limit = 10) {
     queryParams.push(options.minimum_price_per_night * 100);
     // Add "AND" or "WHERE" clause based on whether other conditions have been added
     if (queryParams.length > 1) {
-      queryString += "AND";
+      queryString += " AND";
     } else {
-      queryString += "WHERE";
+      queryString += " WHERE";
     }
     queryString += ` cost_per_night >= $${queryParams.length} `;
   } else if (options.maximum_price_per_night) {
@@ -194,9 +194,9 @@ const getAllProperties = function (options, limit = 10) {
     queryParams.push(options.maximum_price_per_night * 100);
     // Add "AND" or "WHERE" clause based on whether other conditions have been added
     if (queryParams.length > 1) {
-      queryString += "AND";
+      queryString += " AND";
     } else {
-      queryString += "WHERE";
+      queryString += " WHERE";
     }
     queryString += ` cost_per_night <= $${queryParams.length} `;
   }
@@ -212,11 +212,10 @@ const getAllProperties = function (options, limit = 10) {
     `;
   }
 
-  // Add GROUP BY, ORDER BY, and LIMIT clauses to complete the query.
+  // Add ORDER BY and LIMIT clauses to complete the query.
   queryParams.push(limit);
   queryString += `
-    GROUP BY properties.id
-    ORDER BY cost_per_night
+    ORDER BY MAX(cost_per_night)
     LIMIT $${queryParams.length};
   `;
 
@@ -226,6 +225,7 @@ const getAllProperties = function (options, limit = 10) {
   // Execute the query using the pool object and return the result rows.
   return pool.query(queryString, queryParams).then((res) => res.rows);
 };
+
 
 /**
  * Add a property to the database
