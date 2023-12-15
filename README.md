@@ -1,7 +1,7 @@
 
 # LightBnB Project
 
-LightBnB is a simple app that will revolutionize the travel industry. It will allow home owners to rent out their homes to people on vacation, creating an alternative to hotels and bed and breakfasts (built for Lighthouse Labs web development course, designed to learn skills in SQL and Javascript). 
+LightBnB is a simple app that will revolutionize the travel industry. It will allow home owners to rent out their homes to people on vacation, creating an alternative to hotels and bed and breakfasts... revolutionary, right? (built for Lighthouse Labs web development course, designed to learn skills in SQL and Javascript). 
 
 
 ## Features
