@@ -66,6 +66,8 @@ This project has brought me knowledge and skills and I want to thank Lighthouse 
 
 !["Screenshot of Search Listings Page"](https://github.com/pformb/LightBnB/blob/master/docs/search-listings-page.png?raw=true)
 
+## Entity Relationship Diagram
+!["Entity Relationship Diagram"]()
 
 ### Enjoy your stay!
 
