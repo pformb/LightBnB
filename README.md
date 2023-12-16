@@ -1,40 +1,41 @@
 
 # LightBnB Project
 
-LightBnB is a simple app that will revolutionize the travel industry. It will allow home owners to rent out their homes to people on vacation, creating an alternative to hotels and bed and breakfasts... revolutionary, right? (built for Lighthouse Labs web development course, designed to learn skills in SQL and Javascript). 
+This repository contains a straightforward single-page Airbnb clone implemented using server-side JavaScript. The application fetches and displays information from a database through SQL queries, providing a dynamic and responsive user experience.
 
 
 ## Features
 
-- Create User/ Log In
-- Create Property Listing
-- Search Property Listings
-- View Property Listings 
+- Single-page architecture for a comprehensive user experience.
+- Server-side rendering using JavaScript.
+- Integration of SQL queries to fetch and display relevant information.
+- Simplified Airbnb-like design for ease of use.
 
 ## Getting Started
 
 To get started with LightBnB, follow these steps:
 
-Clone the repository to your local machine (SSH):
+Follow these steps to set up the project locally:
 
-```shell
-git clone git@github.com:pformb/LightBnB.git
-```
+1. Clone the repository to your local machine.
+   
+   ```
+   git clone git@github.com:pformb/LightBnB.git
+   ```
 
- Install the required dependencies:
+2. Install the project dependencies using npm.
 
-```shell
-npm install
-```
+    ```
+    npm install
+    ```
 
-Start the Tweeter server:
+3. Update your database by running the following commangs in your psql.
 
-```shell
-node npm run local
-```
-
-Open your web browser and navigate to http://localhost:3000
-
+   ```
+   \i migrations/01_schema.sql
+   \i seeds/01_seeds.sql
+   \i seeds/02_seeds.sql
+   ```
 
 ## Dependencies
 
@@ -58,7 +59,7 @@ This project is open source and available.
 This project has brought me knowledge and skills and I want to thank Lighthouse Labs for providing the mentorship through my education.
 
 
-## Final Product
+## Product Pictures
 
 !["Screenshot of Create Listings Page"](https://github.com/pformb/LightBnB/blob/master/docs/create-listings-page.png?raw=true)
 
@@ -67,7 +68,8 @@ This project has brought me knowledge and skills and I want to thank Lighthouse 
 !["Screenshot of Search Listings Page"](https://github.com/pformb/LightBnB/blob/master/docs/search-listings-page.png?raw=true)
 
 ## Entity Relationship Diagram
-!["Entity Relationship Diagram"]()
+
+!["Entity Relationship Diagram"](https://github.com/pformb/LightBnB/blob/master/docs/erd.png?raw=true)
 
 ### Enjoy your stay!
 
