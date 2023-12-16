@@ -29,7 +29,7 @@ Follow these steps to set up the project locally:
     npm install
     ```
 
-3. Update your database by running the following commangs in your psql.
+3. Update your database by running the following commands in your psql.
 
    ```
    \i migrations/01_schema.sql
